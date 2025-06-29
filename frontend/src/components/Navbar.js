@@ -21,7 +21,7 @@ export default function Navbar() {
           { name: "Dashboard", href: "/admin/dashboard" },
           { name: "Logout", href: "/", action: () => logout() },
         ]
-      : [{ name: "Login", href: "/login" }]),
+      : [{ name: "Login", href: "/admin/login" }]),
   ];
 
   const logout = () => {
