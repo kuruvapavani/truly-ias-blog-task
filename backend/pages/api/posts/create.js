@@ -1,9 +1,17 @@
 import { dbConnect } from '@/lib/dbConnect';
 import Post from '@/models/Post';
 import slugify from 'slugify';
+import { authenticateAdmin } from '@/lib/auth'; // ✅ import auth
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  // ✅ Check for admin authentication
+  try {
+    authenticateAdmin(req);
+  } catch (err) {
+    return res.status(401).json({ error: err.message });
+  }
 
   const { title, content } = req.body;
   if (!title || !content) return res.status(400).json({ error: 'Missing title or content' });

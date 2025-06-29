@@ -1,6 +1,7 @@
 import { dbConnect } from '@/lib/dbConnect';
 import Post from '@/models/Post';
 import slugify from 'slugify';
+import { authenticateAdmin } from '@/lib/auth'; // ✅ import auth
 
 export default async function handler(req, res) {
   const { slug } = req.query;
@@ -14,8 +15,15 @@ export default async function handler(req, res) {
         return res.status(200).json(post);
 
       case 'PUT':
+        try {
+          authenticateAdmin(req); // ✅ only admins can edit
+        } catch (err) {
+          return res.status(401).json({ error: err.message });
+        }
+
         const { title, content } = req.body;
         const updatedSlug = slugify(title, { lower: true, strict: true });
+
         const updatedPost = await Post.findOneAndUpdate(
           { slug },
           { title, content, slug: updatedSlug },
@@ -24,6 +32,12 @@ export default async function handler(req, res) {
         return res.status(200).json(updatedPost);
 
       case 'DELETE':
+        try {
+          authenticateAdmin(req); // ✅ only admins can delete
+        } catch (err) {
+          return res.status(401).json({ error: err.message });
+        }
+
         await Post.findOneAndDelete({ slug });
         return res.status(204).end();
 
