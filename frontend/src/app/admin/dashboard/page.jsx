@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import { useRouter } from "next/navigation";
 import { Eye, Pencil, Trash2 } from 'lucide-react';
 
 export default function AdminDashboard() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const router = useRouter();
   const fetchPosts = async () => {
     try {
       const res = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/posts`);
@@ -33,6 +34,13 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("You must be logged in as admin to access this page");
+      router.push("/admin/login");
+      return;
+    }
     fetchPosts();
   }, []);
 
@@ -71,14 +79,14 @@ export default function AdminDashboard() {
                       <Eye size={20} />
                     </Link>
                     <Link
-                      href={`/admin/edit/${post._id}`}
+                      href={`/admin/edit/${post.slug}`}
                       title="Edit"
                       className="inline-block text-yellow-500 hover:text-yellow-600"
                     >
                       <Pencil size={20} />
                     </Link>
                     <button
-                      onClick={() => deletePost(post._id)}
+                      onClick={() => deletePost(post.slug)}
                       title="Delete"
                       className="inline-block text-red-500 hover:text-red-600"
                     >
