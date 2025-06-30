@@ -22,17 +22,32 @@ export default function AdminDashboard() {
     }
   };
 
-  const deletePost = async (id) => {
-    const confirm = window.confirm(
+  const deletePost = async (slugToDelete) => {
+    const confirmDelete = window.confirm(
       "Are you sure you want to delete this post?"
     );
-    if (!confirm) return;
+    if (!confirmDelete) return;
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in as admin to delete posts.");
+        return;
+      }
+
       await axios.delete(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/posts/${id}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/posts/${slugToDelete}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
-      setPosts(posts.filter((post) => post._id !== id));
+
+      setPosts((prevPosts) =>
+        prevPosts.filter((post) => post.slug !== slugToDelete)
+      );
+      alert("Post deleted successfully");
     } catch (err) {
       console.error("Error deleting post:", err);
       alert("Failed to delete post");
